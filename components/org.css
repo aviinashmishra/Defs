@@ -45,7 +45,7 @@
 .avatars .muted { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .scope-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 6px 0 12px; flex-wrap: wrap; }
 .scope-head h2 { margin: 0; font-size: 18px; letter-spacing: -0.02em; }
-.scope-head .field { width: auto; min-width: 220px; }
+.scope-head .sel { min-width: 220px; }
 
 /* ---------- teams ---------- */
 .teams-manage { display: flex; flex-direction: column; gap: 14px; }
@@ -68,13 +68,13 @@
 .roster select { width: auto; min-height: 36px; padding: 4px 8px; font-size: 13px; }
 .role-badge.lead { color: var(--text); background: color-mix(in srgb, var(--tc, var(--accent)) 22%, transparent); }
 .add-member { display: flex; gap: 8px; }
-.add-member .field { flex: 1; }
+.add-member .sel { flex: 1; width: auto; }
 
 /* ---------- people ---------- */
 .invite-panel { margin-bottom: 14px; }
 .invite-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .invite-row .invite-box { flex: none; }
-.invite-row .field { width: auto; flex: 1 1 220px; }
+.invite-row .sel { width: auto; flex: 1 1 220px; }
 .people-tools { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
 .people-tools .search { flex: 1 1 280px; max-width: 460px; }
 .people-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
@@ -129,6 +129,6 @@
   .team-grid { grid-template-columns: 1fr; }
   .person { flex-wrap: wrap; align-items: flex-start; }
   .p-side { width: 100%; justify-content: flex-start; }
-  .scope-head .field { min-width: 0; width: 100%; }
+  .scope-head .sel { min-width: 0; width: 100%; }
   .org-tabs button span { font-size: 13px; }
 }

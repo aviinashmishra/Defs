@@ -64,6 +64,7 @@ export function HelpModal({ open, onClose }: { open: boolean; onClose: () => voi
             <dt><kbd>N</kbd></dt><dd>Quick add (type or speak)</dd>
             <dt><kbd>T</kbd></dt><dd>New task with details, links &amp; files</dd>
             <dt><kbd>M</kbd></dt><dd>My tasks</dd>
+            <dt><kbd>H</kbd></dt><dd>Task history: every task, filter and export</dd>
             <dt><kbd>E</kbd></dt><dd>Export to Excel, PDF or CSV</dd>
             <dt><kbd>V</kbd></dt><dd>Voice capture</dd>
             <dt><kbd>/</kbd></dt><dd>Search</dd>

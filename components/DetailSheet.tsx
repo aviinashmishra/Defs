@@ -10,6 +10,8 @@ import { Sheet } from './Overlays';
 import { Avatar } from './TaskCard';
 import { AttachmentList, FileDrop, LinksEditor } from './Attachments';
 import { canManageTask } from '@/lib/access';
+import { Select } from './Select';
+import { memberOptions, NO_TEAM_OPTION, PERSONAL_OPTION, teamOptions } from './pickers';
 
 export function DetailSheet({ id, onClose }: { id: string | null; onClose: () => void }) {
   const s = useDayflow();
@@ -101,9 +103,7 @@ export function DetailSheet({ id, onClose }: { id: string | null; onClose: () =>
 
   // Only active people can be picked; someone already set stays visible even if deactivated.
   // Private tasks can only be yours, so the pickers offer just you.
-  const optionsFor = (current: string | null) => s.members.filter((m) => (m.active || m.id === current) && (!t.private || m.id === s.me.id)).map((m) => (
-    <option key={m.id} value={m.id}>{m.name}{m.id === s.me.id ? ' (you)' : ''}{m.active ? '' : ' (deactivated)'}</option>
-  ));
+  const optionsFor = (current: string | null, none: string) => memberOptions(s.members, s.me.id, { none, keep: current, only: (m) => !t.private || m.id === s.me.id });
   const creator = s.members.find((m) => m.id === t.creatorId)?.name;
 
   return (
@@ -156,10 +156,7 @@ export function DetailSheet({ id, onClose }: { id: string | null; onClose: () =>
       {t.status === 3 && (
         <div>
           <label className="field-label" htmlFor="dReviewer">Reviewer</label>
-          <select id="dReviewer" className="field" value={t.reviewerId || ''} onChange={(e) => save({ reviewerId: e.target.value || null }, 'Reviewer')}>
-            <option value="">No reviewer</option>
-            {optionsFor(t.reviewerId)}
-          </select>
+          <Select id="dReviewer" label="Reviewer" value={t.reviewerId || ''} options={optionsFor(t.reviewerId, 'No reviewer')} onChange={(v) => save({ reviewerId: v || null }, 'Reviewer')} />
         </div>
       )}
 
@@ -168,16 +165,12 @@ export function DetailSheet({ id, onClose }: { id: string | null; onClose: () =>
       ) : (
         <div>
           <label className="field-label" htmlFor="dTeam">Team</label>
-          <select id="dTeam" className="field" value={t.private ? 'personal' : t.teamId || ''}
-            onChange={(e) => {
-              const v = e.target.value;
+          <Select id="dTeam" label="Team" value={t.private ? 'personal' : t.teamId || ''}
+            options={[...(t.private || t.creatorId === s.me.id ? [PERSONAL_OPTION] : []), NO_TEAM_OPTION, ...teamOptions(s.teams)]}
+            onChange={(v) => {
               if (v === 'personal') store.setPrivate(t.id, true);
               else save(t.private ? { private: false, teamId: v || null } : { teamId: v || null }, t.private ? 'Share task' : 'Team');
-            }}>
-            {(t.private || t.creatorId === s.me.id) && <option value="personal">Personal (only you)</option>}
-            <option value="">No team</option>
-            {s.teams.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
-          </select>
+            }} />
           {t.private && <p className="muted" style={{ marginTop: 6 }}>Only you can see this task. Pick a team to share it.</p>}
         </div>
       )}
@@ -194,10 +187,7 @@ export function DetailSheet({ id, onClose }: { id: string | null; onClose: () =>
       <div className="two">
         <div>
           <label className="field-label" htmlFor="dAssignee">Assignee</label>
-          <select id="dAssignee" className="field" value={t.assigneeId || ''} onChange={(e) => save({ assigneeId: e.target.value || null }, 'Assign')}>
-            <option value="">Unassigned</option>
-            {optionsFor(t.assigneeId)}
-          </select>
+          <Select id="dAssignee" label="Assignee" value={t.assigneeId || ''} options={optionsFor(t.assigneeId, 'Unassigned')} onChange={(v) => save({ assigneeId: v || null }, 'Assign')} />
         </div>
         <div>
           <label className="field-label" htmlFor="dDue">Due date</label>

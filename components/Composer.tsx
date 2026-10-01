@@ -7,6 +7,8 @@ import { useDayflow, useStore, useUI, type ComposerPreset } from './ctx';
 import { FileDrop, LinksEditor, PendingFiles } from './Attachments';
 import { Icon } from './Icons';
 import { Modal } from './Overlays';
+import { Select } from './Select';
+import { memberOptions, NO_TEAM_OPTION, PERSONAL_OPTION, teamOptions } from './pickers';
 
 const STATUS_HINT = ['Not started yet', 'Working on it now', 'Waiting on something', 'Ready for a check', 'Already finished'];
 
@@ -234,10 +236,8 @@ function ComposerForm({ preset, onClose, guard }: { preset: ComposerPreset; onCl
 
           <div>
             <label className="field-label" htmlFor="cAssignee">Assignee</label>
-            <select id="cAssignee" className="field" value={assigneeId} onChange={(e) => setAssigneeId(e.target.value)}>
-              <option value="">Unassigned</option>
-              {s.members.filter((m) => m.active && (!priv || m.id === s.me.id)).map((m) => <option key={m.id} value={m.id}>{m.name}{m.id === s.me.id ? ' (you)' : ''}</option>)}
-            </select>
+            <Select id="cAssignee" value={assigneeId} onChange={setAssigneeId} label="Assignee"
+              options={memberOptions(s.members, s.me.id, { none: 'Unassigned', only: (m) => !priv || m.id === s.me.id })} />
           </div>
 
           {personalSpace ? (
@@ -245,11 +245,8 @@ function ComposerForm({ preset, onClose, guard }: { preset: ComposerPreset; onCl
           ) : (
             <div>
               <label className="field-label" htmlFor="cTeam">Team</label>
-              <select id="cTeam" className="field" value={teamId} onChange={(e) => { setTeamId(e.target.value); if (e.target.value === 'personal' && assigneeId) setAssigneeId(s.me.id); }}>
-                <option value="personal">Personal (only you)</option>
-                <option value="">No team</option>
-                {s.teams.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
-              </select>
+              <Select id="cTeam" value={teamId} label="Team" onChange={(v) => { setTeamId(v); if (v === 'personal' && assigneeId) setAssigneeId(s.me.id); }}
+                options={[PERSONAL_OPTION, NO_TEAM_OPTION, ...teamOptions(s.teams)]} />
             </div>
           )}
 

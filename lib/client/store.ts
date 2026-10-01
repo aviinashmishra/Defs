@@ -12,7 +12,7 @@ import type { ParsedTask } from '../parser';
 import { ATTACH_MAX_BYTES } from '../types';
 import { isOrgAdmin, leadsTeam } from '../access';
 import type {
-  AppNotification, Attachment, BoardData, Comment, FocusEntry, Me, Member, Organization, OrgRole, OrgTeam, Settings, Source, Status, Task,
+  AppNotification, Attachment, BoardData, Comment, FocusEntry, HistoryEvent, Me, Member, Organization, OrgRole, OrgTeam, Settings, Source, Status, Task,
   TaskDetail, TaskLink, TeamRole, Timer
 } from '../types';
 
@@ -395,13 +395,46 @@ export class DayflowStore {
     const moved = this.state.tasks.filter((t) => t.status === 4 && canClear(me, t));
     if (!moved.length) return 0;
     const ids = moved.map((t) => t.id);
-    this.set({ tasks: this.state.tasks.filter((t) => !ids.includes(t.id)), archived: [...moved, ...this.state.archived] });
+    const at = Date.now();
+    this.set({ tasks: this.state.tasks.filter((t) => !ids.includes(t.id)), archived: [...moved.map((t) => ({ ...t, archivedAt: at })), ...this.state.archived] });
     this.enqueue({ method: 'POST', url: '/api/tasks/archive', body: { ids }, label: 'Clear done' });
     this.pushUndo(`Clear ${ids.length} done`, () => {
       this.set({ tasks: [...moved, ...this.state.tasks], archived: this.state.archived.filter((t) => !ids.includes(t.id)) });
       this.enqueue({ method: 'POST', url: '/api/tasks/unarchive', body: { ids }, label: 'Undo clear' });
     });
     return ids.length;
+  }
+
+  // ---------- history ----------
+  /** Every task you can see, including cleared and deleted ones. */
+  loadHistory() {
+    return api<{ tasks: Task[]; capped: boolean }>('GET', '/api/history');
+  }
+
+  /** One page of the task change log, newest first. `before` is the createdAt of the last entry already shown. */
+  loadHistoryEvents(params: { before?: number; from?: number; to?: number; task?: string; actor?: string; q?: string; limit?: number }) {
+    const qs = new URLSearchParams();
+    for (const [k, v] of Object.entries(params)) if (v !== undefined && v !== '' && v !== null) qs.set(k, String(v));
+    return api<{ entries: HistoryEvent[]; more: boolean }>('GET', `/api/history/activity?${qs}`);
+  }
+
+  /** Brings a deleted task back. Online only: the server decides whether you may. */
+  async restoreTask(id: string): Promise<Task> {
+    const { task } = await api<{ task: Task }>('POST', `/api/tasks/${id}/restore`);
+    const others = { tasks: this.state.tasks.filter((t) => t.id !== id), archived: this.state.archived.filter((t) => t.id !== id) };
+    this.set(task.archivedAt ? { ...others, archived: [task, ...others.archived] } : { ...others, tasks: [task, ...others.tasks] });
+    return task;
+  }
+
+  /** Puts cleared done tasks back on the board. Returns the ones the server let you bring back. */
+  async unarchiveTasks(list: Task[]): Promise<Task[]> {
+    const { ids } = await api<{ ids: string[] }>('POST', '/api/tasks/unarchive', { ids: list.map((t) => t.id) });
+    const back = list.filter((t) => ids.includes(t.id)).map((t) => ({ ...t, archivedAt: null, updatedAt: Date.now() }));
+    this.set({
+      tasks: [...back, ...this.state.tasks.filter((t) => !ids.includes(t.id))],
+      archived: this.state.archived.filter((t) => !ids.includes(t.id))
+    });
+    return back;
   }
 
   async addComment(id: string, text: string): Promise<Comment> {

@@ -13,7 +13,7 @@ export type GroupBy = 'none' | 'status' | 'priority' | 'assignee' | 'team' | 'pr
 export type SortBy = 'due' | 'priority' | 'status' | 'title' | 'created' | 'updated';
 export type ColumnKey =
   | 'title' | 'status' | 'priority' | 'assignee' | 'team' | 'due' | 'project' | 'tags' | 'description' | 'remarks'
-  | 'blocked' | 'links' | 'files' | 'comments' | 'focus' | 'creator' | 'created' | 'updated' | 'done';
+  | 'blocked' | 'links' | 'files' | 'comments' | 'focus' | 'creator' | 'created' | 'updated' | 'done' | 'cycle' | 'record';
 
 export interface ExportOptions {
   scope: 'mine' | 'team';
@@ -33,6 +33,8 @@ export interface ExportOptions {
   sortBy: SortBy;
   format: ExportFormat;
   title: string;
+  /** Replaces the generated filter summary (the History view describes its own filters). */
+  notes?: Array<[string, string]>;
 }
 
 export const ALL_STATUSES: Status[] = [0, 1, 2, 3, 4];
@@ -155,13 +157,15 @@ export interface ColumnDef {
   label: string;
   width: number; // Excel character width
   wrap?: boolean;
-  kind?: 'text' | 'date' | 'datetime' | 'number' | 'hours';
+  kind?: 'text' | 'date' | 'datetime' | 'number' | 'hours' | 'days';
   get: (t: Task, ctx: ExportContext) => CellValue;
 }
 
 const who = (ctx: ExportContext, id: string | null) => (id ? ctx.members.get(id) || 'Former member' : '');
 const date = (iso: string | null) => (iso ? parseISO(iso) : null);
 const at = (ms: number | null) => (ms ? new Date(ms) : null);
+/** Where the task is now: still on the board, cleared after it was done, or deleted. */
+export const recordLabel = (t: Pick<Task, 'archivedAt' | 'deletedAt'>) => (t.deletedAt ? 'Deleted' : t.archivedAt ? 'Cleared' : 'On board');
 
 export const COLUMNS: ColumnDef[] = [
   { key: 'title', label: 'Task', width: 38, wrap: true, get: (t) => t.title },
@@ -182,7 +186,9 @@ export const COLUMNS: ColumnDef[] = [
   { key: 'creator', label: 'Created by', width: 18, get: (t, c) => who(c, t.creatorId) },
   { key: 'created', label: 'Created', width: 18, kind: 'datetime', get: (t) => at(t.createdAt) },
   { key: 'updated', label: 'Last updated', width: 18, kind: 'datetime', get: (t) => at(t.updatedAt) },
-  { key: 'done', label: 'Completed', width: 18, kind: 'datetime', get: (t) => at(t.doneAt) }
+  { key: 'done', label: 'Completed', width: 18, kind: 'datetime', get: (t) => at(t.doneAt) },
+  { key: 'cycle', label: 'Cycle time', width: 12, kind: 'days', get: (t) => (t.doneAt ? Math.round(((t.doneAt - t.createdAt) / 86400000) * 10) / 10 : null) },
+  { key: 'record', label: 'Record', width: 12, get: (t) => recordLabel(t) }
 ];
 
 export function columnsFor(o: ExportOptions): ColumnDef[] {
@@ -226,6 +232,7 @@ export function summarize(tasks: Task[], ctx: ExportContext): Summary {
 
 /** Human-readable list of the filters that narrow the export (shown in every format). */
 export function describeFilters(o: ExportOptions, ctx: ExportContext): Array<[string, string]> {
+  if (o.notes) return [...o.notes, ['Grouped by', GROUP_LABEL[o.groupBy]], ['Sorted by', SORT_LABEL[o.sortBy]]];
   const out: Array<[string, string]> = [['Scope', o.scope === 'mine' ? `My tasks (${ctx.meName})` : `Whole organization (${ctx.orgName})`]];
   out.push(['Status', o.statuses.length === 5 ? 'All' : o.statuses.map((s) => STATUS_NAMES[s]).join(', ') || 'None']);
   out.push(['Priority', o.priorities.length === 3 ? 'All' : o.priorities.map((p) => PRI_LABEL[p]).join(', ') || 'None']);
@@ -262,7 +269,7 @@ function csvValue(v: CellValue, kind?: ColumnDef['kind']): string {
 export function buildCsv(tasks: Task[], o: ExportOptions, ctx: ExportContext): Blob {
   const cols = columnsFor(o);
   const esc = (s: string) => (/[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s);
-  const lines = [cols.map((c) => esc(c.kind === 'hours' ? `${c.label} (h)` : c.label)).join(',')];
+  const lines = [cols.map((c) => esc(c.kind === 'hours' ? `${c.label} (h)` : c.kind === 'days' ? `${c.label} (days)` : c.label)).join(',')];
   for (const t of tasks) lines.push(cols.map((c) => esc(csvValue(c.get(t, ctx), c.kind))).join(','));
   // BOM so Excel opens UTF-8 (names, ₹, emoji) correctly.
   return new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });

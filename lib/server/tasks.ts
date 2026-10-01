@@ -100,7 +100,9 @@ export function mapTask(r: Row): Task {
     statusChangedAt: ms(r.status_changed_at) ?? Date.now(),
     doneAt: ms(r.done_at),
     commentCount: Number(r.comment_count) || 0,
-    attachmentCount: Number(r.attachment_count) || 0
+    attachmentCount: Number(r.attachment_count) || 0,
+    archivedAt: ms(r.archived_at),
+    deletedAt: ms(r.deleted_at)
   };
 }
 

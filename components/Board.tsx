@@ -8,6 +8,7 @@ import { STATUS_NAMES, type Status, type Task } from '@/lib/types';
 import { useDayflow, useStore, useUI } from './ctx';
 import { Icon } from './Icons';
 import { TaskCard } from './TaskCard';
+import { Select, type SelectOption } from './Select';
 
 function useFiltered(): Task[] {
   const s = useDayflow();
@@ -57,17 +58,17 @@ function TeamSelect() {
   // Your teams first, then the rest.
   const teams = [...s.teams].sort((a, b) => Number(mine.has(b.id)) - Number(mine.has(a.id)) || a.name.localeCompare(b.name));
   const loose = count((t) => !t.teamId && !t.private);
+  const options: SelectOption[] = [
+    { value: 'all', label: 'All teams', hint: 'Everything you can see', icon: 'i-org', color: 'var(--accent)', count: count(() => true) },
+    { value: 'personal', label: 'Personal', hint: 'Private, only you', icon: 'i-lock', color: 'var(--accent-2)', count: privateN },
+    ...teams.map((t) => ({
+      value: t.id, label: t.name, hint: t.description || undefined, color: t.color, count: count((x) => x.teamId === t.id),
+      group: mine.size ? (mine.has(t.id) ? 'Your teams' : 'Other teams') : 'Teams'
+    })),
+    ...(loose > 0 || ui.boardTeam === 'none' ? [{ value: 'none', label: 'No team', hint: 'Shared, not in a team', icon: 'i-users', color: 'var(--st0)', count: loose, group: 'More' }] : [])
+  ];
   return (
-    <label className="team-select">
-      <span className="sr-only">Team</span>
-      <Icon name="i-users" />
-      <select value={ui.boardTeam} onChange={(e) => ui.setBoardTeam(e.target.value)}>
-        <option value="all">All teams · {count(() => true)}</option>
-        <option value="personal">Personal · {privateN}</option>
-        {teams.map((t) => <option key={t.id} value={t.id}>{t.name} · {count((x) => x.teamId === t.id)}</option>)}
-        {(loose > 0 || ui.boardTeam === 'none') && <option value="none">No team · {loose}</option>}
-      </select>
-    </label>
+    <Select value={ui.boardTeam} options={options} onChange={ui.setBoardTeam} label="Team" variant="pill" className="team-select" showCount minWidth={280} />
   );
 }
 

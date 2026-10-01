@@ -150,7 +150,7 @@ a.thumb-link:hover .thumb { outline: 2px solid var(--accent); outline-offset: 1p
 .mine-tabs button[aria-selected="true"] .n { background: var(--accent); color: #fff; }
 .mine-tools { display: flex; gap: 8px; align-items: center; flex: 0 1 460px; min-width: 0; }
 .mine-tools .search { flex: 1; min-width: 0; }
-.sort-select { width: auto; min-height: 44px; font-size: 14px; font-weight: 600; padding: 0 10px; border-radius: 14px; background: var(--surface); }
+.sort-select { flex: none; height: 44px; border-radius: 14px; }
 
 .mine-group { margin-bottom: 18px; }
 .group-head { display: flex; align-items: center; gap: 8px; margin: 0 0 8px 4px; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }

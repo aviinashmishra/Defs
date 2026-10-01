@@ -11,6 +11,7 @@ import { STATUS_NAMES, type Priority, type Status } from '@/lib/types';
 import { useDayflow, useStore } from './ctx';
 import { Icon } from './Icons';
 import { Modal } from './Overlays';
+import { Select } from './Select';
 import './mytasks.css';
 import './export.css';
 
@@ -36,7 +37,9 @@ const FORMATS: Array<{ key: ExportFormat; title: string; sub: string; icon: stri
   { key: 'pdf', title: 'PDF report', sub: 'Print-ready A4 report with charts, ready to share', icon: 'i-file', ext: 'PDF' },
   { key: 'csv', title: 'CSV data', sub: 'Plain rows for Sheets, BI tools or imports', icon: 'i-text', ext: 'CSV' }
 ];
-const DUE_KEYS: DueFilter[] = ['any', 'overdue', 'today', 'week', 'month', 'none', 'custom'];
+const GROUP_ICON: Record<GroupBy, string> = { none: 'i-list', status: 's1', priority: 'i-flag', assignee: 'i-user', team: 'i-users', project: 'i-folder', due: 'i-cal' };
+const SORT_ICON: Record<SortBy, string> = { due: 'i-cal', priority: 'i-flag', status: 's1', title: 'i-text', created: 'i-plus', updated: 'i-history' };
+const DUE_KEYS: DueFilter[] =['any', 'overdue', 'today', 'week', 'month', 'none', 'custom'];
 
 function Block({ icon, label, action, children }: { icon: string; label: string; action?: ReactNode; children: ReactNode }) {
   return (
@@ -249,15 +252,13 @@ function ExportForm({ preset, onClose }: { preset: Partial<ExportOptions>; onClo
           <div className="two">
             <div>
               <label className="field-label" htmlFor="xpGroup">Group by</label>
-              <select id="xpGroup" className="field" value={o.groupBy} disabled={o.format === 'csv'} onChange={(e) => set({ groupBy: e.target.value as GroupBy })}>
-                {(Object.keys(GROUP_LABEL) as GroupBy[]).map((k) => <option key={k} value={k}>{GROUP_LABEL[k]}</option>)}
-              </select>
+              <Select id="xpGroup" label="Group by" value={o.groupBy} disabled={o.format === 'csv'} onChange={(v) => set({ groupBy: v })}
+                options={(Object.keys(GROUP_LABEL) as GroupBy[]).map((k) => ({ value: k, label: GROUP_LABEL[k], icon: GROUP_ICON[k] }))} />
             </div>
             <div>
               <label className="field-label" htmlFor="xpSort">Sort by</label>
-              <select id="xpSort" className="field" value={o.sortBy} onChange={(e) => set({ sortBy: e.target.value as SortBy })}>
-                {(Object.keys(SORT_LABEL) as SortBy[]).map((k) => <option key={k} value={k}>{SORT_LABEL[k]}</option>)}
-              </select>
+              <Select id="xpSort" label="Sort by" value={o.sortBy} onChange={(v) => set({ sortBy: v })}
+                options={(Object.keys(SORT_LABEL) as SortBy[]).map((k) => ({ value: k, label: SORT_LABEL[k], icon: SORT_ICON[k] }))} />
             </div>
           </div>
           {o.format === 'xlsx' && (

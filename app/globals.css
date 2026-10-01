@@ -192,8 +192,8 @@ kbd { font-family: var(--mono); font-size: 11px; padding: 2px 6px; border-radius
 @keyframes cube { from { transform: rotateX(-24deg) rotateY(0); } to { transform: rotateX(-24deg) rotateY(360deg); } }
 
 /* Equal-width tabs so one gradient pill can glide between them (--i = selected index). */
-.view-tabs { position: relative; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 4px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); }
-.vtab-glide { position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc((100% - 8px) / 3); border-radius: 999px; background: linear-gradient(135deg, #4a63f5, #8b3dff); box-shadow: 0 6px 16px -6px var(--glow), inset 0 1px 0 rgba(255, 255, 255, .25); transform: translateX(calc(var(--i, 0) * 100%)); transition: transform .5s cubic-bezier(.3, 1.35, .5, 1); }
+.view-tabs { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 4px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); }
+.vtab-glide { position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc((100% - 8px) / 4); border-radius: 999px; background: linear-gradient(135deg, #4a63f5, #8b3dff); box-shadow: 0 6px 16px -6px var(--glow), inset 0 1px 0 rgba(255, 255, 255, .25); transform: translateX(calc(var(--i, 0) * 100%)); transition: transform .5s cubic-bezier(.3, 1.35, .5, 1); }
 .vtab { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; gap: 7px; padding: 7px 18px; border-radius: 999px; font-weight: 600; font-size: 13.5px; white-space: nowrap; color: var(--text-2); transition: color .3s; }
 .vtab svg { width: 16px; height: 16px; }
 .vtab[aria-selected="true"] { color: #fff; }
@@ -275,13 +275,12 @@ main { max-width: calc(var(--page-w) + 32px); margin: 0 auto; padding: 28px 16px
 
 /* ---------- toolbar: search · team · filters · export, one row ---------- */
 .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 18px; }
-.search, .team-select { display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px; border-radius: 999px; background: var(--surface-solid); border: 1px solid var(--line); transition: border-color .2s, box-shadow .2s; }
+.search { display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px; border-radius: 999px; background: var(--surface-solid); border: 1px solid var(--line); transition: border-color .2s, box-shadow .2s; }
 .search { flex: 0 1 300px; min-width: 200px; }
-.search:focus-within, .team-select:focus-within { border-color: color-mix(in srgb, var(--accent) 50%, transparent); box-shadow: 0 0 0 3px var(--glow); }
-.search svg, .team-select svg { width: 16px; height: 16px; color: var(--muted); }
+.search:focus-within { border-color: color-mix(in srgb, var(--accent) 50%, transparent); box-shadow: 0 0 0 3px var(--glow); }
+.search svg { width: 16px; height: 16px; color: var(--muted); }
 .search input { flex: 1; border: 0; outline: 0; background: transparent; height: 100%; font-size: 14px; min-width: 0; }
-.team-select { flex: none; padding-right: 8px; cursor: pointer; }
-.team-select select { height: 100%; border: 0; outline: 0; background: transparent; font-size: 14px; font-weight: 600; color: var(--text); cursor: pointer; padding-right: 4px; }
+.team-select { flex: none; max-width: 280px; }
 .chips { display: flex; gap: 6px; min-width: 0; overflow-x: auto; scrollbar-width: none; }
 .chips::-webkit-scrollbar { display: none; }
 .chip { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px; border-radius: 999px; font-size: 13px; font-weight: 600; white-space: nowrap; color: var(--text-2); border: 1px solid transparent; transition: background .2s, color .2s, border-color .2s; }
@@ -531,11 +530,11 @@ textarea.field { resize: vertical; min-height: 70px; }
   :root { --topbar-h: 54px; --topbar-gap: 8px; --nav-h: 72px; }
   body { font-size: 15px; }
   main { padding: 14px 16px 40px; }
-  /* Views and settings move to the bottom nav on phones. */
+  /* Views move to the bottom nav on phones; the avatar stays up top for settings. */
   .topbar { display: flex; gap: 8px; padding: 0 6px; }
   .top-actions { margin-left: auto; }
   .brand-mark { width: 40px; height: 40px; }
-  .view-tabs, #settingsBtn { display: none; }
+  .view-tabs { display: none; }
 
   .hero-head { margin-bottom: 14px; }
   .greet { font-size: 24px; }
@@ -550,8 +549,6 @@ textarea.field { resize: vertical; min-height: 70px; }
   .toolbar { flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
   .search { flex: 1 1 0; min-width: 0; }
   .team-select { max-width: 46%; }
-  .team-select svg { display: none; }
-  .team-select select { min-width: 0; max-width: 100%; text-overflow: ellipsis; }
   .chips { order: 3; flex: 0 0 calc(100% + 32px); margin: 0 -16px; padding: 0 16px 2px; }
 
   .col-tabs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; padding: 4px; margin-bottom: 12px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); position: sticky; top: calc(var(--topbar-h) + var(--topbar-gap) + 6px); z-index: 20; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }

@@ -357,9 +357,9 @@ function writeTask(ws: ExcelJS.Worksheet, r: number, t: Task, cols: ColumnDef[],
         if (t.dueDate < today) { cell.font = font({ bold: true, color: argb(C.red) }); cell.fill = solid(C.redSoft); }
         else if (t.dueDate === today) { cell.font = font({ bold: true, color: argb(C.amber) }); cell.fill = solid(C.amberSoft); }
       }
-    } else if (c.kind === 'number' || c.kind === 'hours') {
+    } else if (c.kind === 'number' || c.kind === 'hours' || c.kind === 'days') {
       cell.value = v;
-      cell.numFmt = c.kind === 'hours' ? '0.0 "h";;"—"' : '0;;"—"';
+      cell.numFmt = c.kind === 'hours' ? '0.0 "h";;"—"' : c.kind === 'days' ? '0.0 "d";;"—"' : '0;;"—"';
       cell.font = font({ color: argb(C.ink2) });
     } else {
       cell.value = v;

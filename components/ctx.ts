@@ -17,7 +17,7 @@ export function useDayflow(): State {
   return useSyncExternalStore(s.subscribe, s.getState, s.getState);
 }
 
-export type View = 'board' | 'mine' | 'org';
+export type View = 'board' | 'mine' | 'history' | 'org';
 export type OrgTab = 'overview' | 'teams' | 'people' | 'audit';
 /** Which tasks the board shows: 'all', 'personal' (private to you), 'none' (shared, no team) or a team id. */
 export type BoardTeam = string;

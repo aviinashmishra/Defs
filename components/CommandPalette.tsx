@@ -69,6 +69,7 @@ function Palette({ onClose }: { onClose: () => void }) {
       { id: 'team-up', group: 'Create', label: personal ? 'Create a team and invite people' : 'Create a team', icon: 'i-users', words: 'team invite share people organization upgrade', run: go(ui.openTeamUp) },
       { id: 'v-board', group: 'Go to', label: 'Board', icon: 'i-board', words: 'kanban columns', run: go(() => ui.setView('board')) },
       { id: 'v-mine', group: 'Go to', label: 'My tasks', icon: 'i-list', keys: 'M', words: 'list assigned', run: go(() => ui.setView('mine')) },
+      { id: 'v-history', group: 'Go to', label: 'Task history', icon: 'i-history', keys: 'H', words: 'archive log activity past completed deleted cleared restore audit export', run: go(() => ui.setView('history')) },
       { id: 'v-org', group: 'Go to', label: personal ? 'Insights' : 'Organization dashboard', icon: personal ? 'i-chart' : 'i-org', keys: 'O', words: 'insights pulse stats chart company', run: go(() => ui.openOrg('overview')) },
       ...(!personal ? [
         { id: 'v-teams', group: 'Go to', label: 'Teams', icon: 'i-users', words: 'organization members', run: go(() => ui.openOrg('teams')) },

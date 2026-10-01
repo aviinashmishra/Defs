@@ -45,6 +45,10 @@ export interface Task {
   doneAt: number | null;
   commentCount: number;
   attachmentCount: number;
+  /** Set once the task was cleared from the board ("Clear done"). */
+  archivedAt?: number | null;
+  /** Set once the task was deleted (it can still be restored). History only. */
+  deletedAt?: number | null;
 }
 
 export interface TeamMembership {
@@ -183,6 +187,17 @@ export interface Attachment {
 /** Upload limits, shared so the client can refuse early with a clear message. */
 export const ATTACH_MAX_BYTES = 3 * 1024 * 1024;
 export const ATTACH_MAX_PER_TASK = 20;
+
+/** One entry of the organization-wide task log (History → Activity). */
+export interface HistoryEvent {
+  id: string;
+  taskId: string;
+  taskTitle: string;
+  actorId: string | null;
+  actorName: string;
+  change: string;
+  createdAt: number;
+}
 
 export interface ActivityItem {
   id: string;

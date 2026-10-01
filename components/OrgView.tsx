@@ -9,6 +9,8 @@ import { useDayflow, useStore, useUI, type OrgTab } from './ctx';
 import { Icon } from './Icons';
 import { Avatar } from './TaskCard';
 import { Insights } from './Insights';
+import { Select } from './Select';
+import { memberOptions, NO_TEAM_OPTION, teamOptions } from './pickers';
 import './org.css';
 
 export const TEAM_COLORS = ['#4f6cff', '#2a78d6', '#128a5f', '#0b7a0b', '#a86e00', '#d9541f', '#c93a3a', '#c23d72', '#5a49c4', '#6b7391'];
@@ -233,11 +235,11 @@ function Overview() {
       <div className="scope-head">
         <h2>Pulse · {scopeName}</h2>
         <label className="sr-only" htmlFor="pulseScope">Show</label>
-        <select id="pulseScope" className="field" value={scope} onChange={(e) => setScope(e.target.value)}>
-          <option value="all">Whole organization</option>
-          {s.teams.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
-          <option value="none">No team</option>
-        </select>
+        <Select id="pulseScope" label="Show" variant="pill" value={scope} onChange={setScope} align="end" options={[
+          { value: 'all', label: 'Whole organization', icon: 'i-org', color: 'var(--accent)' },
+          ...teamOptions(s.teams),
+          { ...NO_TEAM_OPTION, value: 'none' }
+        ]} />
       </div>
       <Insights teamId={scope} label={scopeName} embedded />
     </>
@@ -355,11 +357,12 @@ function TeamManage({ team }: { team: OrgTeam }) {
               <Avatar name={m.name} />
               <div className="m-name">{m.name}{self ? ' (you)' : ''}<small>{m.title || m.email}</small></div>
               {can ? (
-                <select className="field" aria-label={`${m.name}'s role in ${team.name}`} value={lead ? 'lead' : 'member'} disabled={busy}
-                  onChange={(e) => void run(() => store.setTeamMember(team.id, m.id, e.target.value as TeamRole), `${m.name} is now ${e.target.value === 'lead' ? 'a lead' : 'a member'} of ${team.name}`)}>
-                  <option value="member">Member</option>
-                  <option value="lead">Lead</option>
-                </select>
+                <Select<TeamRole> variant="sm" label={`${m.name}'s role in ${team.name}`} value={lead ? 'lead' : 'member'} disabled={busy} align="end"
+                  options={[
+                    { value: 'member', label: 'Member', hint: 'Works on the team’s tasks', icon: 'i-user' },
+                    { value: 'lead', label: 'Lead', hint: 'Manages members and tasks', icon: 'i-flag' }
+                  ]}
+                  onChange={(r) => void run(() => store.setTeamMember(team.id, m.id, r), `${m.name} is now ${r === 'lead' ? 'a lead' : 'a member'} of ${team.name}`)} />
               ) : <span className={`role-badge${lead ? ' lead' : ''}`}>{lead ? 'Lead' : 'Member'}</span>}
               {(can || self) && (
                 <button className="icon-btn" aria-label={self ? `Leave ${team.name}` : `Remove ${m.name} from ${team.name}`} title={self ? 'Leave team' : 'Remove from team'} disabled={busy}
@@ -381,10 +384,8 @@ function TeamManage({ team }: { team: OrgTeam }) {
           void run(() => store.setTeamMember(team.id, who.id, 'member'), `Added ${who.name} to ${team.name}`).then((ok) => ok && setAdding(''));
         }}>
           <label className="sr-only" htmlFor={`add-${team.id}`}>Add someone to {team.name}</label>
-          <select id={`add-${team.id}`} className="field" value={adding} onChange={(e) => setAdding(e.target.value)}>
-            <option value="">Add someone…</option>
-            {addable.map((m) => <option key={m.id} value={m.id}>{m.name}{m.title ? ` · ${m.title}` : ''}</option>)}
-          </select>
+          <Select id={`add-${team.id}`} label={`Add someone to ${team.name}`} value={adding} onChange={setAdding} placeholder="Add someone…"
+            options={memberOptions(addable, s.me.id)} />
           <button className="btn btn-ghost" disabled={!adding || busy}><Icon name="i-user-plus" />Add</button>
         </form>
       )}
@@ -486,17 +487,15 @@ function PeopleTab() {
               <div className="p-side">
                 {m.active && <span className="p-load" title="Open tasks assigned">{w?.open ?? 0} open{w?.blocked ? <b className="warn"> · {w.blocked} blocked</b> : null}</span>}
                 {canRole && m.active ? (
-                  <select className="field" aria-label={`${m.name}'s organization role`} value={m.role} disabled={busy}
-                    onChange={(e) => {
-                      const r = e.target.value as OrgRole;
+                  <Select<OrgRole> variant="sm" label={`${m.name}'s organization role`} value={m.role} disabled={busy} align="end" minWidth={260}
+                    options={(['member', 'admin', ...(isOwner(s.me) ? ['owner' as const] : [])] as OrgRole[]).map((r) => ({
+                      value: r, label: ROLE_LABEL[r], hint: ROLE_HELP[r], icon: r === 'member' ? 'i-user' : r === 'admin' ? 'i-gear' : 'i-sparkle'
+                    }))}
+                    onChange={(r) => {
                       const why = roleBlock(r);
-                      if (why) { toast(why, { icon: 'i-x' }); e.target.value = m.role; return; }
+                      if (why) { toast(why, { icon: 'i-x' }); return; }
                       void run(() => store.setOrgRole(m.id, r), `${m.name} is now ${ROLE_LABEL[r].toLowerCase()}`);
-                    }}>
-                    <option value="member">Member</option>
-                    <option value="admin">Admin</option>
-                    {isOwner(s.me) && <option value="owner">Owner</option>}
-                  </select>
+                    }} />
                 ) : <span className={`role-badge role-${m.role}`} title={ROLE_HELP[m.role]}>{ROLE_LABEL[m.role] ?? m.role}</span>}
                 {admin && !self && !offWhy && (m.active ? (
                   <button className="btn btn-ghost danger-text" disabled={busy}
@@ -531,10 +530,10 @@ function InvitePanel({ code }: { code: string }) {
       <div className="invite-row">
         <div className="invite-box"><code aria-label="Invite code">{code}</code></div>
         <label className="sr-only" htmlFor="inviteTeam">Team</label>
-        <select id="inviteTeam" className="field" value={team} onChange={(e) => setTeam(e.target.value)}>
-          <option value="">Any team (they join the first one)</option>
-          {s.teams.map((t) => <option key={t.id} value={t.id}>Join {t.name}</option>)}
-        </select>
+        <Select id="inviteTeam" label="Team" className="invite-team" value={team} onChange={setTeam} options={[
+          { value: '', label: 'Any team', hint: 'They join the first one', icon: 'i-users', color: 'var(--accent)' },
+          ...teamOptions(s.teams, (t) => `Join ${t.name}`)
+        ]} />
         <button className="btn btn-3d btn-primary" onClick={async () => toast((await copyText(link)) ? 'Invite link copied' : link, { icon: 'i-user-plus' })}><Icon name="i-copy" />Copy link</button>
         <button className="btn btn-ghost" disabled={busy} onClick={() => { if (confirm('Issue a new code? The current link and code stop working.')) void run(() => store.regenerateInvite(), 'New invite code ready'); }}>
           <Icon name="i-undo" />New code

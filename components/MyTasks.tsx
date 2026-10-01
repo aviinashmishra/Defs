@@ -7,6 +7,7 @@ import { useDayflow, useStore, useUI } from './ctx';
 import { useNow } from './hooks';
 import { Icon } from './Icons';
 import { Avatar } from './TaskCard';
+import { Select } from './Select';
 
 type Tab = 'open' | 'progress' | 'blocked' | 'review' | 'done';
 type Sort = 'due' | 'priority' | 'recent';
@@ -113,12 +114,11 @@ export function MyTasks() {
           </div>
           {tab !== 'done' && (
             <>
-              <label htmlFor="mineSort" className="sr-only">Sort</label>
-              <select id="mineSort" className="field sort-select" value={sort} onChange={(e) => setSort(e.target.value as Sort)}>
-                <option value="due">By due date</option>
-                <option value="priority">By priority</option>
-                <option value="recent">Recently updated</option>
-              </select>
+              <Select id="mineSort" label="Sort" variant="pill" className="sort-select" value={sort} onChange={setSort} align="end" options={[
+                { value: 'due', label: 'By due date', hint: 'Grouped: overdue, today, this week…', icon: 'i-cal' },
+                { value: 'priority', label: 'By priority', hint: 'High first', icon: 'i-flag' },
+                { value: 'recent', label: 'Recently updated', hint: 'Latest changes first', icon: 'i-history' }
+              ]} />
             </>
           )}
         </div>

@@ -35,6 +35,7 @@ function cell(c: ColumnDef, t: Task, ctx: ExportContext, today: string): string 
     }
     case 'focus': return t.timeSpent >= 60 ? `${(t.timeSpent / 3600).toFixed(1)} h` : '<span class="muted">—</span>';
     case 'files': case 'comments': return v ? String(v) : '<span class="muted">—</span>';
+    case 'cycle': return v == null ? '<span class="muted">—</span>' : `${v} d`;
     default:
       if (v instanceof Date) return `<span class="nowrap">${esc(short(v, c.kind === 'datetime'))}</span>`;
       return v ? esc(String(v)) : '<span class="muted">—</span>';

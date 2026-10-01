@@ -23,7 +23,7 @@ function OfflineChip({ text }: { text: string }) {
 /** Shows ⌘ on Apple keyboards, Ctrl elsewhere. */
 const isMac = () => typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
 
-const VIEWS: View[] = ['board', 'mine', 'org'];
+const VIEWS: View[] = ['board', 'mine', 'history', 'org'];
 
 export function TopBar() {
   const s = useDayflow();
@@ -41,6 +41,7 @@ export function TopBar() {
         <span className="vtab-glide" aria-hidden="true" />
         <button role="tab" className="vtab" aria-selected={ui.view === 'board'} onClick={() => ui.setView('board')}><Icon name="i-board" /><span>Board</span></button>
         <button role="tab" className="vtab" aria-selected={ui.view === 'mine'} onClick={() => ui.setView('mine')}><Icon name="i-list" /><span>My tasks</span></button>
+        <button role="tab" className="vtab" aria-selected={ui.view === 'history'} onClick={() => ui.setView('history')}><Icon name="i-history" /><span>History</span></button>
         <button role="tab" className="vtab" aria-selected={ui.view === 'org'} onClick={() => ui.openOrg(ui.orgTab)}><Icon name={personal ? 'i-chart' : 'i-org'} /><span>{personal ? 'Insights' : 'Organization'}</span></button>
       </nav>
       <div className="top-actions">
@@ -66,8 +67,8 @@ export function BottomNav() {
       <button className={`bn-mic${ui.voice.listening ? ' listening' : ''}`} aria-label={ui.voice.listening ? 'Stop listening' : 'Add by voice'} aria-pressed={ui.voice.listening} onClick={ui.voice.toggle}>
         <span className="mic-ring r1" /><span className="mic-ring r2" /><Icon name="i-mic" />
       </button>
-      <button className="bn" aria-current={ui.view === 'org' ? 'page' : undefined} onClick={() => ui.openOrg(ui.orgTab)}><Icon name={personal ? 'i-chart' : 'i-org'} /><span>{personal ? 'Insights' : 'Organization'}</span></button>
-      <button className="bn" onClick={ui.openSettings}><Icon name="i-gear" /><span>Settings</span></button>
+      <button className="bn" aria-current={ui.view === 'history' ? 'page' : undefined} onClick={() => ui.setView('history')}><Icon name="i-history" /><span>History</span></button>
+      <button className="bn" aria-current={ui.view === 'org' ? 'page' : undefined} onClick={() => ui.openOrg(ui.orgTab)}><Icon name={personal ? 'i-chart' : 'i-org'} /><span>{personal ? 'Insights' : 'Org'}</span></button>
     </nav>
   );
 }

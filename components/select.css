@@ -1,0 +1,93 @@
+/* ==========================================================================
+   Select, MultiSelect and MenuButton (components/Select.tsx).
+   Triggers match the surrounding controls; the list is a solid card on the
+   theme surface, so it reads the same in light and dark.
+   ========================================================================== */
+
+/* ---------- triggers ---------- */
+.sel { position: relative; display: inline-flex; align-items: center; gap: 8px; min-width: 0; text-align: left; color: var(--text); font-weight: 600; transition: border-color .2s, box-shadow .2s, background .2s; }
+.sel:disabled { opacity: .55; cursor: default; }
+.sel-value { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sel-value.empty { color: var(--muted); font-weight: 500; }
+.sel-chev { width: 16px; height: 16px; flex: none; margin-left: auto; color: var(--muted); transition: transform .25s cubic-bezier(.2, .9, .25, 1.2), color .2s; }
+.sel.open .sel-chev { transform: rotate(180deg); color: var(--accent); }
+.sel.open, .sel:focus-visible { outline: 0; border-color: color-mix(in srgb, var(--accent) 60%, transparent); box-shadow: 0 0 0 3px var(--glow); }
+
+/* Looks like .field: forms, sheets, dialogs. */
+.sel-field { width: 100%; min-height: 44px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--line-strong); background: var(--surface-2); font-size: 15px; font-weight: 500; }
+.sel-field:not(:disabled):hover { border-color: color-mix(in srgb, var(--accent) 40%, var(--line-strong)); }
+/* Round, toolbar-height: board team switcher, filters, sorting. */
+.sel-pill { height: 40px; padding: 0 12px 0 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface-solid); font-size: 14px; }
+.sel-pill:not(:disabled):hover { border-color: var(--line-strong); box-shadow: var(--shadow-1); }
+.sel-pill.has-value { border-color: color-mix(in srgb, var(--accent) 55%, transparent); background: color-mix(in srgb, var(--accent) 9%, var(--surface-solid)); }
+.sel-pill.has-value .sel-lead { color: var(--accent); }
+/* Compact: roles in rosters, settings rows. */
+.sel-sm { min-height: 36px; padding: 0 8px 0 10px; border-radius: 10px; border: 1px solid var(--line-strong); background: var(--surface-2); font-size: 13px; }
+.sel-sm .sel-chev { width: 14px; height: 14px; }
+
+.sel-lead { flex: none; display: inline-grid; place-items: center; width: 20px; height: 20px; color: var(--oc, currentColor); }
+.sel > .sel-lead { color: var(--oc, var(--muted)); }
+.sel-lead svg { width: 16px; height: 16px; }
+.sel-lead .avatar { width: 22px; height: 22px; font-size: 9.5px; }
+.sel-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--oc, var(--accent)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--oc, var(--accent)) 20%, transparent); }
+.sel-count { flex: none; min-width: 22px; padding: 1px 7px; border-radius: 999px; font-size: 11.5px; font-weight: 700; text-align: center; font-variant-numeric: tabular-nums; color: var(--text-2); background: var(--surface-3); }
+.sel-badge { flex: none; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; display: grid; place-items: center; font-size: 11px; font-weight: 700; color: #fff; background: var(--accent); }
+
+/* ---------- the list ---------- */
+.sel-pop {
+  position: fixed; z-index: 88; display: flex; flex-direction: column; width: max-content; overflow: hidden;
+  padding: 6px; border-radius: 16px; color: var(--text);
+  background: var(--surface-solid);
+  border: 1px solid var(--line-strong);
+  box-shadow: var(--shadow-3), 0 0 0 1px color-mix(in srgb, var(--accent) 10%, transparent), 0 18px 40px -20px var(--glow);
+  animation: selIn .22s cubic-bezier(.2, .9, .25, 1.15);
+}
+@keyframes selIn { from { opacity: 0; transform: translateY(-4px) scale(.97); } }
+.sel-list { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; outline: 0; display: flex; flex-direction: column; gap: 2px; scrollbar-width: thin; }
+.sel-group { padding: 10px 10px 4px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.sel-group:first-child { padding-top: 4px; }
+
+.sel-opt { position: relative; display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 8px 10px; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--text); user-select: none; transition: background .12s; }
+.sel-opt.active { background: color-mix(in srgb, var(--accent) 10%, var(--surface-2)); }
+.sel-opt.on { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+.sel-opt.on.active { background: color-mix(in srgb, var(--accent) 20%, transparent); }
+.sel-opt.on::before { content: ''; position: absolute; left: 0; top: 9px; bottom: 9px; width: 3px; border-radius: 0 3px 3px 0; background: var(--accent); }
+.sel-opt.disabled { opacity: .45; cursor: default; }
+.sel-text { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.25; }
+.sel-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sel-text small { font-size: 12px; font-weight: 500; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sel-opt.on .sel-count { color: #fff; background: var(--accent); }
+.sel-tick { flex: none; width: 18px; display: grid; place-items: center; color: var(--accent); }
+.sel-tick svg { width: 16px; height: 16px; }
+.sel-box { flex: none; width: 20px; height: 20px; border-radius: 6px; display: grid; place-items: center; color: transparent; border: 1.5px solid var(--line-strong); background: var(--surface-solid); transition: background .15s, border-color .15s, color .15s; }
+.sel-box svg { width: 13px; height: 13px; }
+.sel-opt.on .sel-box { color: #fff; background: var(--accent); border-color: var(--accent); }
+.sel-empty { margin: 0; padding: 14px 10px; font-size: 13px; color: var(--muted); text-align: center; }
+
+.sel-search { display: flex; align-items: center; gap: 8px; margin: 0 0 6px; padding: 0 10px; height: 38px; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--line); }
+.sel-search:focus-within { border-color: color-mix(in srgb, var(--accent) 50%, transparent); }
+.sel-search svg { width: 15px; height: 15px; color: var(--muted); }
+.sel-search input { flex: 1; min-width: 0; height: 100%; border: 0; outline: 0; background: transparent; font-size: 14px; }
+
+.sel-foot { display: flex; align-items: center; gap: 8px; margin: 6px -6px -6px; padding: 8px 8px 8px 6px; border-top: 1px solid var(--line); background: var(--surface-2); }
+.sel-foot-n { flex: 1; font-size: 12px; font-weight: 600; color: var(--muted); }
+.sel-foot .link-btn:disabled { opacity: .4; cursor: default; }
+.sel-done { min-height: 32px; padding: 0 14px; border-radius: 9px; font-size: 13px; }
+
+/* Menus: actions, no selection state. */
+.sel-menu .sel-opt { min-height: 46px; }
+.sel-menu .sel-lead { width: 32px; height: 32px; border-radius: 10px; background: color-mix(in srgb, var(--oc, var(--accent)) 14%, transparent); color: var(--oc, var(--accent)); }
+
+/* ---------- phones: a bottom sheet ---------- */
+.sel-scrim { position: fixed; inset: 0; z-index: 87; background: rgba(5, 8, 20, .45); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); animation: fade .2s; }
+.sel-pop.sel-sheet { left: 0; right: 0; bottom: 0; width: auto; max-height: 78dvh; padding: 0 10px calc(10px + var(--safe-b)); border-radius: 24px 24px 0 0; border-bottom: 0; animation: selUp .32s cubic-bezier(.2, .9, .25, 1); }
+@keyframes selUp { from { transform: translateY(40%); opacity: .5; } }
+.sel-sheet-head { display: grid; grid-template-columns: 1fr auto; align-items: center; padding: 6px 0 8px 8px; }
+.sel-sheet-head .sel-grab { grid-column: 1 / -1; justify-self: center; width: 44px; height: 5px; border-radius: 5px; background: var(--line-strong); margin-bottom: 6px; }
+.sel-sheet-head b { font-size: 16px; }
+.sel-sheet .sel-opt { min-height: 50px; font-size: 15px; }
+.sel-sheet .sel-foot { margin: 8px -10px 0; padding: 10px 12px; }
+
+@media (forced-colors: active) {
+  .sel-opt.on, .sel-opt.active { outline: 2px solid Highlight; }
+}

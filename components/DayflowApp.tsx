@@ -21,6 +21,7 @@ import { DetailSheet } from './DetailSheet';
 import { SettingsSheet } from './SettingsSheet';
 import { HelpModal, StandupModal } from './Modals';
 import { MyTasks } from './MyTasks';
+import { History } from './History';
 import { Composer } from './Composer';
 import { ExportDialog } from './ExportDialog';
 import { CommandPalette } from './CommandPalette';
@@ -50,7 +51,7 @@ function Shell({ store }: { store: DayflowStore }) {
 
   const [view, setViewState] = useState<View>(() => {
     const h = typeof location === 'undefined' ? '' : location.hash;
-    return h.startsWith('#org') || h === '#insights' ? 'org' : h === '#mine' ? 'mine' : 'board';
+    return h.startsWith('#org') || h === '#insights' ? 'org' : h === '#mine' ? 'mine' : h === '#history' ? 'history' : 'board';
   });
   const [orgTab, setOrgTab] = useState<OrgTab>(() => {
     const t = typeof location === 'undefined' ? '' : location.hash.split('/')[1];
@@ -397,6 +398,7 @@ function Shell({ store }: { store: DayflowStore }) {
       else if (k === 'i') { if (view === 'org' && orgTab === 'overview') setView('board'); else openOrg('overview'); }
       else if (k === 'o') { if (view === 'org') setView('board'); else openOrg(orgTab); }
       else if (k === 'm') { setView(view === 'mine' ? 'board' : 'mine'); }
+      else if (k === 'h') { setView(view === 'history' ? 'board' : 'history'); }
       else if (k === 't') { e.preventDefault(); setComposer({}); }
       else if (k === 'e') { e.preventDefault(); setExporting({ scope: view === 'board' ? 'team' : 'mine' }); }
     };
@@ -442,6 +444,7 @@ function Shell({ store }: { store: DayflowStore }) {
           <BoardView />
         </section>
         {view === 'mine' && <MyTasks />}
+        {view === 'history' && <History />}
         {view === 'org' && <OrgView />}
       </main>
       <FocusDock />

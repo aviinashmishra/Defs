@@ -7,6 +7,7 @@ import type { Settings } from '@/lib/types';
 import { useDayflow, useStore, useUI } from './ctx';
 import { Icon } from './Icons';
 import { Sheet } from './Overlays';
+import { Select } from './Select';
 
 function Switch({ k, title, sub }: { k: keyof Settings; title: string; sub: string }) {
   const s = useDayflow();
@@ -90,12 +91,12 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
       <div className="set-group">
         <h3>Voice</h3>
         <label className="field-label" htmlFor="sLang">Speech language</label>
-        <select id="sLang" className="field" value={s.me.settings.lang} onChange={(e) => store.updateSettings({ lang: e.target.value })}>
-          <option value="en-IN">English (India) — works with Hinglish</option>
-          <option value="hi-IN">Hindi</option>
-          <option value="en-US">English (US)</option>
-          <option value="en-GB">English (UK)</option>
-        </select>
+        <Select id="sLang" label="Speech language" value={s.me.settings.lang} onChange={(lang) => store.updateSettings({ lang })} options={[
+          { value: 'en-IN', label: 'English (India)', hint: 'Works with Hinglish', icon: 'i-mic' },
+          { value: 'hi-IN', label: 'Hindi', hint: 'हिन्दी', icon: 'i-mic' },
+          { value: 'en-US', label: 'English (US)', icon: 'i-mic' },
+          { value: 'en-GB', label: 'English (UK)', icon: 'i-mic' }
+        ]} />
         <div className="toggle-row" style={{ marginTop: 8 }}>
           <div>
             <b>Hands-free “Hey Dayflow”</b>
@@ -119,10 +120,9 @@ export function SettingsSheet({ open, onClose }: { open: boolean; onClose: () =>
         <Switch k="shareFocusInStandup" title="Show focus time in standup" sub="Off by default. The timer is for you." />
         <div className="toggle-row">
           <div><b>Focus session length</b><span>Chime and nudge for a break</span></div>
-          <select className="field" style={{ width: 'auto', minHeight: 38 }} aria-label="Focus session length" value={s.me.settings.pomodoro}
-            onChange={(e) => store.updateSettings({ pomodoro: Number(e.target.value) })}>
-            {[0, 15, 25, 45, 50].map((m) => <option key={m} value={m}>{m ? `${m} min` : 'Off'}</option>)}
-          </select>
+          <Select variant="sm" label="Focus session length" value={String(s.me.settings.pomodoro)} align="end" minWidth={180}
+            onChange={(v) => store.updateSettings({ pomodoro: Number(v) })}
+            options={[0, 15, 25, 45, 50].map((m) => ({ value: String(m), label: m ? `${m} min` : 'Off', icon: m ? 'i-clock' : 'i-x' }))} />
         </div>
       </div>
 
